@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down -v"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -78,6 +78,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "setupFiles": [
+      "reflect-metadata"
+    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

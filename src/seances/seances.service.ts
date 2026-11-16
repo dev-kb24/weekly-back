@@ -6,14 +6,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { getWeekRange } from '../common/helpers/week-range.helper';
-import { SportType } from './enums/sport-type.enum';
-import type { CreateSeanceDto } from './dto/create-seance.dto';
+import type { FindAllFilters } from '../common/interfaces/find-all-filters.interface';
+import type { CreateRunningPartieDto, CreateSeanceDto } from './dto/create-seance.dto';
 import type { UpdateSeanceDto } from './dto/update-seance.dto';
 import { Seance } from './seance.entity';
 
-export interface FindAllFilters {
-  week?: string;
-  sport?: SportType;
+function mapPartieDto(p: CreateRunningPartieDto): Omit<CreateRunningPartieDto, 'distanceKm'> & { distanceMeters: number | null } {
+  const { distanceKm, ...rest } = p;
+  return {
+    ...rest,
+    distanceMeters: distanceKm != null ? Math.round(distanceKm * 1000) : null,
+  };
 }
 
 @Injectable()
@@ -24,14 +27,17 @@ export class SeancesService {
   ) {}
 
   create(userId: string, dto: CreateSeanceDto): Promise<Seance> {
-    const seance = this.seanceRepo.create({ ...dto, userId });
+    const mapped = {
+      ...dto,
+      parties: dto.parties?.map(mapPartieDto),
+      userId,
+    };
+    const seance = this.seanceRepo.create(mapped);
     return this.seanceRepo.save(seance);
   }
 
   findAll(userId: string, filters: FindAllFilters): Promise<Seance[]> {
     const where: Record<string, unknown> = { userId };
-
-    if (filters.sport) where.sportType = filters.sport;
 
     if (filters.week) {
       const { startDate, endDate } = getWeekRange(filters.week);
@@ -57,7 +63,11 @@ export class SeancesService {
     dto: UpdateSeanceDto,
   ): Promise<Seance> {
     const seance = await this.findOne(userId, id);
-    const updated = this.seanceRepo.merge(seance, dto);
+    const mapped = {
+      ...dto,
+      parties: dto.parties?.map(mapPartieDto),
+    };
+    const updated = this.seanceRepo.merge(seance, mapped);
     return this.seanceRepo.save(updated);
   }
 

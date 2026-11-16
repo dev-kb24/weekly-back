@@ -8,7 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthService, TokenPair } from './auth.service';
+import type { TokenPair } from '../common/interfaces/token-pair.interface';
+import { ApiResponse } from '../common/presenters/api-response.presenter';
+import { UserResponseDto } from '../users/dto/user-response.dto';
+import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -21,8 +24,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterDto,
+  ): Promise<ApiResponse<UserResponseDto>> {
+    const user = await this.authService.register(dto);
+    return new ApiResponse(201, 'success', new UserResponseDto(user));
   }
 
   @HttpCode(HttpStatus.OK)

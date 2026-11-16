@@ -14,10 +14,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiResponse } from '../common/presenters/api-response.presenter';
 import { User } from '../users/user.entity';
 import { CreateSeanceDto } from './dto/create-seance.dto';
+import { SeanceResponseDto } from './dto/seance-response.dto';
 import { UpdateSeanceDto } from './dto/update-seance.dto';
-import { SportType } from './enums/sport-type.enum';
 import { SeancesService } from './seances.service';
 
 @ApiTags('seances')
@@ -28,33 +29,46 @@ export class SeancesController {
   constructor(private readonly seancesService: SeancesService) {}
 
   @Post()
-  create(@Request() req: { user: User }, @Body() dto: CreateSeanceDto) {
-    return this.seancesService.create(req.user.id, dto);
+  @HttpCode(HttpStatus.CREATED)
+  async create(
+    @Request() req: { user: User },
+    @Body() dto: CreateSeanceDto,
+  ): Promise<ApiResponse<SeanceResponseDto>> {
+    const seance = await this.seancesService.create(req.user.id, dto);
+    return new ApiResponse(201, 'success', new SeanceResponseDto(seance));
   }
 
   @ApiQuery({ name: 'week', required: false, example: '2026-W15' })
-  @ApiQuery({ name: 'sport', required: false, enum: SportType })
   @Get()
-  findAll(
+  async findAll(
     @Request() req: { user: User },
     @Query('week') week?: string,
-    @Query('sport') sport?: SportType,
-  ) {
-    return this.seancesService.findAll(req.user.id, { week, sport });
+  ): Promise<ApiResponse<SeanceResponseDto[]>> {
+    const seances = await this.seancesService.findAll(req.user.id, { week });
+    return new ApiResponse(
+      200,
+      'success',
+      seances.map((s) => new SeanceResponseDto(s)),
+    );
   }
 
   @Get(':id')
-  findOne(@Request() req: { user: User }, @Param('id') id: string) {
-    return this.seancesService.findOne(req.user.id, id);
+  async findOne(
+    @Request() req: { user: User },
+    @Param('id') id: string,
+  ): Promise<ApiResponse<SeanceResponseDto>> {
+    const seance = await this.seancesService.findOne(req.user.id, id);
+    return new ApiResponse(200, 'success', new SeanceResponseDto(seance));
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Request() req: { user: User },
     @Param('id') id: string,
     @Body() dto: UpdateSeanceDto,
-  ) {
-    return this.seancesService.update(req.user.id, id, dto);
+  ): Promise<ApiResponse<SeanceResponseDto>> {
+    const seance = await this.seancesService.update(req.user.id, id, dto);
+    return new ApiResponse(200, 'success', new SeanceResponseDto(seance));
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

@@ -1,45 +1,86 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsEnum,
-  IsInt,
   IsISO8601,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
+  Max,
   Min,
-  ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import {
-  CyclingSeanceType,
-  RunningSeanceType,
-  SportType,
-} from '../enums/sport-type.enum';
+import { CadenceType, DurationUnit, PartType } from '../enums/sport-type.enum';
 
-export class ExerciseDto {
-  @ApiProperty({ example: 'Squat' })
-  @IsString()
-  name!: string;
+export class CreateRunningPartieDto {
+  @ApiPropertyOptional({ example: 'uuid', description: 'ID de la partie (pour mise à jour)' })
+  @IsOptional()
+  @IsUUID()
+  id?: string;
 
-  @ApiPropertyOptional({ example: 4 })
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  @Min(1)
+  order!: number;
+
+  @ApiProperty({ enum: PartType })
+  @IsEnum(PartType)
+  type!: PartType;
+
+  @ApiProperty({ enum: DurationUnit })
+  @IsEnum(DurationUnit)
+  durationUnit!: DurationUnit;
+
+  @ApiPropertyOptional({ example: 15, description: 'Durée en minutes (si durationUnit = time)' })
   @IsOptional()
   @IsInt()
   @Min(1)
-  sets?: number;
+  durationMinutes?: number;
 
-  @ApiPropertyOptional({ example: 12 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  reps?: number;
-
-  @ApiPropertyOptional({ example: 60.5 })
+  @ApiPropertyOptional({ example: 5.0, description: 'Distance en km (si durationUnit = distance) — stockée en mètres en BDD' })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  weight?: number;
+  distanceKm?: number;
+
+  @ApiProperty({ enum: CadenceType })
+  @IsEnum(CadenceType)
+  cadenceType!: CadenceType;
+
+  @ApiPropertyOptional({ example: 2, description: 'Zone cardiaque 1-5 (si cadenceType = zone)' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  heartRateZone?: number;
+
+  @ApiPropertyOptional({ example: 270, description: 'Allure minimum en sec/km (ex: 270 = 4min30s) — si cadenceType = allure' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  allureMinMin?: number;
+
+  @ApiPropertyOptional({ example: 300, description: 'Allure maximum en sec/km (ex: 300 = 5min00s) — si cadenceType = allure' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  allureMinMax?: number;
+
+  @ApiPropertyOptional({ example: 10, description: 'Nombre de répétitions du bloc' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  repetitions?: number;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'ID du bloc de répétition (parties groupées)' })
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  blockId?: string;
 }
 
 export class CreateSeanceDto {
@@ -47,68 +88,20 @@ export class CreateSeanceDto {
   @IsISO8601({ strict: true })
   date!: string;
 
-  @ApiProperty({ enum: SportType })
-  @IsEnum(SportType)
-  sportType!: SportType;
-
-  @ApiPropertyOptional({
-    example: 'EF',
-    description: `Running: ${Object.values(RunningSeanceType).join(' | ')} — Cycling: ${Object.values(CyclingSeanceType).join(' | ')}`,
-  })
+  @ApiPropertyOptional({ example: 'Fractionné du jeudi' })
   @IsOptional()
   @IsString()
-  seanceType?: string;
+  title?: string;
 
-  @ApiProperty({ example: 60, description: 'Duration in minutes' })
-  @IsInt()
-  @Min(1)
-  duration!: number;
-
-  @ApiPropertyOptional({ example: 10.5, description: 'Distance in km' })
-  @ValidateIf((o: CreateSeanceDto) =>
-    [SportType.RUNNING, SportType.CYCLING, SportType.NATATION].includes(
-      o.sportType,
-    ),
-  )
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  distance?: number;
-
-  @ApiPropertyOptional({ example: 'Felt great' })
+  @ApiPropertyOptional({ example: 'Bonne séance' })
   @IsOptional()
   @IsString()
   notes?: string;
 
-  // Running specific
-  @ApiPropertyOptional({ example: 5.3, description: 'Pace in min/km' })
-  @ValidateIf((o: CreateSeanceDto) => o.sportType === SportType.RUNNING)
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  allure?: number;
-
-  @ApiPropertyOptional({ example: 145, description: 'Heart rate in bpm' })
-  @ValidateIf((o: CreateSeanceDto) => o.sportType === SportType.RUNNING)
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  heartRate?: number;
-
-  // Cycling specific
-  @ApiPropertyOptional({ example: 800, description: 'Elevation gain in meters' })
-  @ValidateIf((o: CreateSeanceDto) => o.sportType === SportType.CYCLING)
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  elevation?: number;
-
-  // Renforcement specific
-  @ApiPropertyOptional({ type: [ExerciseDto] })
-  @ValidateIf((o: CreateSeanceDto) => o.sportType === SportType.RENFORCEMENT)
-  @IsOptional()
+  @ApiProperty({ type: [CreateRunningPartieDto] })
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => ExerciseDto)
-  exercises?: ExerciseDto[];
+  @Type(() => CreateRunningPartieDto)
+  parties!: CreateRunningPartieDto[];
 }

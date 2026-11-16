@@ -8,14 +8,10 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import type { TokenPair } from '../common/interfaces/token-pair.interface';
 import { User } from '../users/user.entity';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
-
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
 
 @Injectable()
 export class AuthService {

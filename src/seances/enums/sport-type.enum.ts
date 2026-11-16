@@ -1,18 +1,15 @@
-export enum SportType {
+export enum PartType {
+  ECHAUFFEMENT = 'echauffement',
   RUNNING = 'running',
-  CYCLING = 'cycling',
-  RENFORCEMENT = 'renforcement',
-  NATATION = 'natation',
+  RECUPERATION = 'recuperation',
 }
 
-export enum RunningSeanceType {
-  FRACTIONNE = 'fractionné',
-  EF = 'EF',
-  SL = 'SL',
+export enum DurationUnit {
+  TIME = 'time',
+  DISTANCE = 'distance',
 }
 
-export enum CyclingSeanceType {
-  SL = 'SL',
-  ENDURANCE = 'endurance',
-  SEUIL = 'seuil',
+export enum CadenceType {
+  ZONE = 'zone',
+  ALLURE = 'allure',
 }

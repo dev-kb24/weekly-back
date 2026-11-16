@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { Exercise } from './seances/exercise.entity';
+import { RunningPartie } from './seances/running-partie.entity';
 import { Seance } from './seances/seance.entity';
 import { SeancesModule } from './seances/seances.module';
 import { User } from './users/user.entity';
@@ -21,7 +21,7 @@ import { UsersModule } from './users/users.module';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [User, Seance, Exercise],
+        entities: [User, Seance, RunningPartie],
         synchronize: true,
       }),
     }),

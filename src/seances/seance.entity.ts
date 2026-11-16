@@ -8,58 +8,37 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
-import { Exercise } from './exercise.entity';
-import { SportType } from './enums/sport-type.enum';
+import { RunningPartie } from './running-partie.entity';
 
 @Entity('seances')
 export class Seance {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ type: 'date' })
-  date: string;
-
-  @Column({ type: 'enum', enum: SportType })
-  sportType: SportType;
+  date!: string;
 
   @Column({ nullable: true, type: 'varchar' })
-  seanceType: string | null;
-
-  @Column({ type: 'int' })
-  duration: number;
-
-  @Column({ type: 'float', nullable: true })
-  distance: number | null;
+  title!: string | null;
 
   @Column({ type: 'text', nullable: true })
-  notes: string | null;
-
-  // Running specific
-  @Column({ type: 'float', nullable: true })
-  allure: number | null;
-
-  @Column({ type: 'int', nullable: true })
-  heartRate: number | null;
-
-  // Cycling specific
-  @Column({ type: 'int', nullable: true })
-  elevation: number | null;
+  notes!: string | null;
 
   @ManyToOne(() => User, (user) => user.seances, { onDelete: 'CASCADE' })
-  user: User;
+  user!: User;
 
   @Column()
-  userId: string;
+  userId!: string;
 
-  @OneToMany(() => Exercise, (exercise) => exercise.seance, {
+  @OneToMany(() => RunningPartie, (partie) => partie.seance, {
     cascade: true,
     eager: true,
   })
-  exercises: Exercise[];
+  parties!: RunningPartie[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

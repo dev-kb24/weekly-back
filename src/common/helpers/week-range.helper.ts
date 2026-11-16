@@ -1,7 +1,5 @@
-export interface WeekRange {
-  startDate: Date;
-  endDate: Date;
-}
+import type { WeekRange } from '../interfaces/week-range.interface';
+export type { WeekRange };
 
 /**
  * Converts an ISO week string (e.g. "2026-W15") to a date range

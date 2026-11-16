@@ -1,0 +1,251 @@
+{
+  "info": {
+    "name": "Weekly Back API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "seanceId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data) {",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken ?? '');",
+                  "  pm.collectionVariables.set('refreshToken', body.refreshToken ?? '');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "body": { "mode": "raw", "raw": "" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seances",
+      "item": [
+        {
+          "name": "Create Seance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "  pm.collectionVariables.set('seanceId', body.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seances",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-05-03\",\n  \"title\": \"Fractionne du jeudi\",\n  \"notes\": \"Bonne seance, jambes legeres\",\n  \"parties\": [\n    {\n      \"order\": 1,\n      \"type\": \"echauffement\",\n      \"durationUnit\": \"time\",\n      \"durationMinutes\": 15,\n      \"cadenceType\": \"zone\",\n      \"heartRateZone\": 1\n    },\n    {\n      \"order\": 2,\n      \"type\": \"running\",\n      \"durationUnit\": \"time\",\n      \"durationMinutes\": 5,\n      \"cadenceType\": \"allure\",\n      \"allureMinMin\": 255,\n      \"allureMinMax\": 270,\n      \"repetitions\": 5,\n      \"blockId\": \"550e8400-e29b-41d4-a716-446655440000\"\n    },\n    {\n      \"order\": 3,\n      \"type\": \"recuperation\",\n      \"durationUnit\": \"time\",\n      \"durationMinutes\": 2,\n      \"cadenceType\": \"zone\",\n      \"heartRateZone\": 1,\n      \"repetitions\": 5,\n      \"blockId\": \"550e8400-e29b-41d4-a716-446655440000\"\n    },\n    {\n      \"order\": 4,\n      \"type\": \"recuperation\",\n      \"durationUnit\": \"time\",\n      \"durationMinutes\": 10,\n      \"cadenceType\": \"zone\",\n      \"heartRateZone\": 1\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "List Seances",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/seances",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances"]
+            }
+          }
+        },
+        {
+          "name": "List Seances by Week",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/seances?week=2026-W18",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances"],
+              "query": [{ "key": "week", "value": "2026-W18" }]
+            }
+          }
+        },
+        {
+          "name": "Get Seance",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/seances/{{seanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances", "{{seanceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Seance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seances/{{seanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances", "{{seanceId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Fractionne du jeudi - modifie\",\n  \"notes\": \"Seance mise a jour\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Seance",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/seances/{{seanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["seances", "{{seanceId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
